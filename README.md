@@ -4,9 +4,14 @@ This is a bare bones boilerplate of Angular-CLI and Phaser-CE. Webpack configura
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.6.2.
 
+## Installation
+
+- clone https://github.com/GrindheadGames/phaser-ce-angular-cli-boilerplate.git
+- npm install 
+
 ## Development server
    
-   - "npm start" to serve the app using webpack-dev-server.
+- "npm start" to serve the app using webpack-dev-server.
 
 ## Code scaffolding
 
