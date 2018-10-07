@@ -46,9 +46,9 @@ export class AppComponent {
 
       game.load.tilemap('map', 'assets/tilemaps/tilemap.json', null, Phaser.Tilemap.TILED_JSON);
       game.load.image('tiles', 'assets/tilemaps/map.png');
-      game.load.image('player', 'assets/player-mini.png');
-      
-      // game.load.image('bomb', 'assets/bomb.png');
+      game.load.image('player', 'assets/player-mini.png');   
+      game.load.image('bomb', 'assets/bomb.png');
+      game.load.image('explosion', 'assets/explosion.png');
 
       // player = game.add.sprite( 122, 122, 'player' );
       // player.animations.add('teste');
@@ -89,16 +89,43 @@ export class AppComponent {
       }
       else if (cursors.left.isDown)
       {
-          player.body.velocity.x = -150;
+        player.body.velocity.x = -150;
       }
       else if (cursors.right.isDown)
       {
-          player.body.velocity.x = 150;
+        player.body.velocity.x = 150;
       }
       else {
         player.body.velocity.x = 0;
         player.body.velocity.y = 0;
       }
+
+      game.input.keyboard.onDownCallback = function (e) {
+        if (e.keyCode === 32) spanwBomb();
+      }
+
     }
+
+    function spanwBomb() {
+      let x = player.position.x - player.position.x % 32;
+      let y = player.position.y - player.position.y % 32;
+
+      let bomb = game.add.sprite(x, y, 'bomb');
+
+      createEvent(4, detonateBomb, this, bomb);
+    }
+
+    function detonateBomb(bomb) {
+      console.log(bomb);
+      let fire = game.add.sprite(bomb.position.x, bomb.position.y, 'explosion');
+      bomb.destroy();
+      createEvent(.3, (fire) => fire.destroy(), this, fire);
+    }
+
+    function createEvent(seconds, callback, context, params) {
+      console.log(params)
+      game.time.events.add(Phaser.Timer.SECOND * seconds, callback, context, params);
+    }
+
   }
 }
