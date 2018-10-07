@@ -28,6 +28,7 @@ export class AppComponent {
     let map;
     let layer;
     let cursors;
+    let boxGroup;
 
     // player
     let playerStatus: PlayerModule = {
@@ -49,6 +50,7 @@ export class AppComponent {
       game.load.image('player', 'assets/player-mini.png');   
       game.load.image('bomb', 'assets/bomb.png');
       game.load.image('explosion', 'assets/explosion.png');
+      game.load.image('box', 'assets/box.png');
 
       // player = game.add.sprite( 122, 122, 'player' );
       // player.animations.add('teste');
@@ -60,6 +62,7 @@ export class AppComponent {
 
       game.physics.startSystem(Phaser.Physics.ARCADE);
 
+      // tilemap
       game.stage.backgroundColor = '#28b162'; 
       map = game.add.tilemap('map');  
       map.addTilesetImage('map', 'tiles');
@@ -69,17 +72,31 @@ export class AppComponent {
 
       layer.resizeWorld();
 
-      player = game.add.sprite(32*2, 32*3, 'player');
-      game.physics.arcade.enable(player)
+      // obstacles
+      boxGroup = game.add.group();
+      boxGroup.enableBody = true;
+      map.createFromObjects('boxLayer', 3, 'box', 0, true, false, boxGroup);
 
-     player.body.collideWorldBounds = true;
-     
-     cursors = game.input.keyboard.createCursorKeys();
+      boxGroup.forEach(box => {
+        game.physics.arcade.enable(box);
+        box.body.immovable = true;
+      });
+
+      // player
+      player = game.add.sprite(32*2, 32*3, 'player');
+      game.physics.arcade.enable(player);
+
+      player.body.collideWorldBounds = true;
+
+      // keyboard
+      cursors = game.input.keyboard.createCursorKeys();
 
     }
 
     function update() {
       game.physics.arcade.collide(player, layer);
+      
+      boxGroup.forEach(box => game.physics.arcade.collide(player, boxGroup));
 
       if (cursors.up.isDown){
         player.body.velocity.y = -150;
