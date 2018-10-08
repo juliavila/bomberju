@@ -3,7 +3,6 @@ import 'phaser-ce/build/custom/pixi';
 import 'phaser-ce/build/custom/p2';
 import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 import { MapService } from './shared/services/map.service';
-import { MapType } from './shared/enums/map-type.enum';
 import { PlayerModule } from './player/player.module';
 
 @Component({
@@ -33,8 +32,10 @@ export class AppComponent {
     // player
     let playerStatus: PlayerModule = {
       position: { x: 1, y: 1 },
-      bombs: 1
+      bombs: 1,
+      range: 1
     }
+
     let player;
 
     let game = new Phaser.Game(tileSize*mapWidth, tileSize*mapHeight, Phaser.AUTO, 'content', {
@@ -94,10 +95,18 @@ export class AppComponent {
     }
 
     function update() {
+
+      //collisions
       game.physics.arcade.collide(player, layer);
-      
       boxGroup.forEach(box => game.physics.arcade.collide(player, boxGroup));
 
+      checkKeyboard(cursors);
+
+    }
+
+    function checkKeyboard(cursors) {
+
+      // moves
       if (cursors.up.isDown){
         player.body.velocity.y = -150;
       }
@@ -117,10 +126,10 @@ export class AppComponent {
         player.body.velocity.y = 0;
       }
 
+      // spawn bomb
       game.input.keyboard.onDownCallback = function (e) {
         if (e.keyCode === 32) spanwBomb();
       }
-
     }
 
     function spanwBomb() {
@@ -129,18 +138,67 @@ export class AppComponent {
 
       let bomb = game.add.sprite(x, y, 'bomb');
 
-      createEvent(4, detonateBomb, this, bomb);
+      createEvent(2, detonateBomb, this, bomb);
     }
 
     function detonateBomb(bomb) {
-      console.log(bomb);
+      let explosion = [];
+
       let fire = game.add.sprite(bomb.position.x, bomb.position.y, 'explosion');
+      explosion.push(fire);
+
+      for(let i = 1; i <= playerStatus.range; i++) {
+        let x = bomb.position.x;
+        let y = bomb.position.y + 32 * i;
+        if (!explode(x, y)) break;;  
+        addFire(x, y);
+      }
+
+      for(let i = 1; i <= playerStatus.range; i++) {
+        let x = bomb.position.x + 32 * i;
+        let y = bomb.position.y;
+        if (!explode(x, y)) break;;  
+        addFire(x, y);
+      }
+
+      for(let i = 1; i <= playerStatus.range; i++) {
+        let x = bomb.position.x;
+        let y = bomb.position.y - 32 * i;
+        if (!explode(x, y)) break;;  
+        addFire(x, y);
+      }
+
+      for(let i = 1; i <= playerStatus.range; i++) {
+        let x = bomb.position.x -  32 * i;
+        let y = bomb.position.y;
+        if (!explode(x, y)) break;;  
+        addFire(x, y);
+      }
+
       bomb.destroy();
-      createEvent(.3, (fire) => fire.destroy(), this, fire);
+      explosion.forEach( f => createEvent(.3, (f) => f.destroy(), this, f) );
+  
+      function explode(x: number, y: number) {
+        let box = boxGroup.filter( box => (box.position.x == x && box.position.y == y) ).list[0];
+        
+        if (box) {
+          box.destroy();
+          box.position.x += 10;
+          return true;
+        } else {
+          let tile = map.getTile(x / tileSize, y / tileSize, layer);
+          if (tile.index === 2) return false;
+        }
+        return true;
+      }
+
+      function addFire(x, y) {
+        let fire = game.add.sprite(x, y, 'explosion');
+        explosion.push(fire);
+      }
     }
 
     function createEvent(seconds, callback, context, params) {
-      console.log(params)
       game.time.events.add(Phaser.Timer.SECOND * seconds, callback, context, params);
     }
 
