@@ -61,10 +61,6 @@ export class AppComponent {
       game.load.image('explosion', 'assets/explosion.png');
       game.load.image('box', 'assets/box.png');
 
-      // player = game.add.sprite( 122, 122, 'player' );
-      // player.animations.add('teste');
-      // player.animations.play('teste', 1, true);
-
     }
   
     function create() {
@@ -155,6 +151,10 @@ export class AppComponent {
     }
 
     function spanwBomb() {
+      if (!playerStatus.bombs) return;
+
+      playerStatus.bombs--;
+
       let x = player.position.x - player.position.x % 32;
       let y = player.position.y - player.position.y % 32;
 
@@ -164,6 +164,8 @@ export class AppComponent {
     }
 
     function detonateBomb(bomb) {
+      playerStatus.bombs++;
+      
       let explosion = [];
 
       addFire(bomb.position.x, bomb.position.y);
