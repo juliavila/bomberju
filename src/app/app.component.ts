@@ -11,13 +11,19 @@ import { PlayerModule } from './player/player.module';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
+
+  controller = {
+    dead: false,
+    winner: false
+  }
+
   title = 'app';
   
   constructor(private mapService: MapService) {
-    this.buildPhaser(mapService);
+    this.buildPhaser(mapService, this.controller);
   }
   
-  buildPhaser(mapService: MapService) {
+  buildPhaser(mapService: MapService, controller) {
     
     // tile config
     const tileSize = 32;
@@ -28,6 +34,8 @@ export class AppComponent {
     let layer;
     let cursors;
     let boxGroup;
+
+    let fires = [];
 
     // player
     let playerStatus: PlayerModule = {
@@ -89,6 +97,9 @@ export class AppComponent {
 
       player.body.collideWorldBounds = true;
 
+      player.body.onCollide = new Phaser.Signal();
+      player.body.onCollide.add(checkPlayerCollision, this);
+
       // keyboard
       cursors = game.input.keyboard.createCursorKeys();
 
@@ -96,12 +107,23 @@ export class AppComponent {
 
     function update() {
 
+      if (controller.dead) return;
+
       //collisions
       game.physics.arcade.collide(player, layer);
-      boxGroup.forEach(box => game.physics.arcade.collide(player, boxGroup));
+      game.physics.arcade.collide(player, boxGroup);
 
+      fires.forEach(fire => game.physics.arcade.collide(player, fire));
+      
       checkKeyboard(cursors);
 
+    }
+
+    function checkPlayerCollision(p, other) {
+      if (other.key === 'explosion') {
+        controller.dead = true;
+        player.renderable = false;
+      }
     }
 
     function checkKeyboard(cursors) {
@@ -144,8 +166,7 @@ export class AppComponent {
     function detonateBomb(bomb) {
       let explosion = [];
 
-      let fire = game.add.sprite(bomb.position.x, bomb.position.y, 'explosion');
-      explosion.push(fire);
+      addFire(bomb.position.x, bomb.position.y);
 
       for(let i = 1; i <= playerStatus.range; i++) {
         let x = bomb.position.x;
@@ -194,6 +215,8 @@ export class AppComponent {
 
       function addFire(x, y) {
         let fire = game.add.sprite(x, y, 'explosion');
+        game.physics.arcade.enable(fire);
+        fires.push(fire);
         explosion.push(fire);
       }
     }
