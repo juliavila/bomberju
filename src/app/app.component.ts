@@ -46,6 +46,7 @@ export class AppComponent {
 
     let fires = [];
     let bombDuration = 2;
+    let fireDuration = .3;
 
     // player
     let playerStatus: PlayerModule = {
@@ -55,6 +56,7 @@ export class AppComponent {
     }
 
     let player;
+    let otherPlayer;
 
     let game = new Phaser.Game(tileSize*mapWidth, tileSize*mapHeight, Phaser.AUTO, 'content', {
       preload: preload,
@@ -106,6 +108,9 @@ export class AppComponent {
       player.body.onCollide = new Phaser.Signal();
       player.body.onCollide.add(checkPlayerCollision, this);
 
+      // TODO: inicializar em lugares opostos
+      // otherPlayer = game.add.sprite(tileSize*2, tileSize*3, 'player');
+
       // keyboard
       cursors = game.input.keyboard.createCursorKeys();
 
@@ -133,21 +138,26 @@ export class AppComponent {
     }
 
     function checkKeyboard(cursors) {
+      let moved = false;
 
       // moves
       if (cursors.up.isDown){
         player.body.velocity.y = -150;
+        moved = true;
       }
       else if (cursors.down.isDown) {
         player.body.velocity.y = 150;
+        moved = true;
       }
       else if (cursors.left.isDown)
       {
         player.body.velocity.x = -150;
+        moved = true;
       }
       else if (cursors.right.isDown)
       {
         player.body.velocity.x = 150;
+        moved = true;
       }
       else {
         player.body.velocity.x = 0;
@@ -158,6 +168,11 @@ export class AppComponent {
       game.input.keyboard.onDownCallback = function (e) {
         if (e.keyCode === 32) spanwBomb();
       }
+
+      // TODO: atualizar somente a cada x tempo;
+      // if (moved){
+      //   sendMessage(eventType[3], player.position.x, player.position.y);
+      // }
     }
 
     function spanwBomb() {
@@ -211,14 +226,14 @@ export class AppComponent {
       }
 
       bomb.destroy();
-      explosion.forEach( f => createEvent(.3, (f) => f.destroy(), this, f) );
+      explosion.forEach( f => createEvent(fireDuration, (f) => f.destroy(), this, f) );
   
       function explode(x: number, y: number) {
-        let box = boxGroup.filter( box => (box.position.x == x && box.position.y == y) ).list[0];
+        let box = findBox(x, y);
         
         if (box) {
           box.destroy();
-          box.position.x += 10;
+          sendMessage(eventType[2], x, y);
           return true;
         } else {
           let tile = map.getTile(x / tileSize, y / tileSize, layer);
@@ -227,12 +242,23 @@ export class AppComponent {
         return true;
       }
 
-      function addFire(x, y) {
-        let fire = game.add.sprite(x, y, 'explosion');
-        game.physics.arcade.enable(fire);
-        fires.push(fire);
-        explosion.push(fire);
+      function addFire(x: number, y: number) {
+        explosion.push(createFire(x, y));
+        sendMessage(eventType[1], x, y);
       }
+    }
+
+    function createFire(x: number, y: number) {
+
+      let fire = game.add.sprite(x, y, 'explosion');
+      game.physics.arcade.enable(fire);
+      fires.push(fire);
+
+      return fire;
+    }
+
+    function findBox(x: number, y: number) {
+      return boxGroup.filter( box => (box.position.x == x && box.position.y == y) ).list[0];
     }
 
     function createEvent(seconds, callback, context, params) {
@@ -259,15 +285,37 @@ export class AppComponent {
 
       if (data.id === event.id) return;
 
+      // add bomb
       if (data.type === eventType[0]) {
-        createFakeBomb(data);
+        createFakeBomb(data.x, data.y);
+        return;
+      }
+
+      // add fire
+      if (data.type === eventType[1]) {
+        let fire = createFire(data.x, data.y);
+        createEvent(fireDuration, (fire) => fire.destroy(), this, fire)
+        return;
+      }
+
+      // destroy box
+      if (data.type === eventType[2]) {
+        let box = findBox(data.x, data.y);
+        if (box) box.destroy();
+        return;
+      }
+
+      // other player
+      if (data.type === eventType[3] && otherPlayer !== undefined) {
+        otherPlayer.position.x = data.x;
+        otherPlayer.position.y = data.y;
         return;
       }
 
     })
 
-    function createFakeBomb(data) {
-      let bomb = game.add.sprite(data.x, data.y, 'bomb');
+    function createFakeBomb(x, y) {
+      let bomb = game.add.sprite(x, y, 'bomb');
       createEvent(bombDuration, (bomb)=>bomb.destroy(), this, bomb);
     }
 
