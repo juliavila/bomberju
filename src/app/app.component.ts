@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import 'phaser-ce/build/custom/pixi';
 import 'phaser-ce/build/custom/p2';
 import * as Phaser from 'phaser-ce/build/custom/phaser-split';
-import { MapService } from './shared/services/map.service';
 import { PlayerModule } from './player/player.module';
+import { GameService } from './shared/services/game.service';
 
 @Component({
   selector: 'app-root',
@@ -19,12 +19,21 @@ export class AppComponent {
 
   title = 'app';
   
-  constructor(private mapService: MapService) {
-    this.buildPhaser(mapService, this.controller);
+  constructor(private gameService: GameService) {
+    this.buildPhaser(this.controller, gameService);
   }
   
-  buildPhaser(mapService: MapService, controller) {
-    
+  buildPhaser(controller, gameService) {
+
+    // websocket init config
+    let eventType = [ 'bomb', 'fire', 'destroyBox', 'player', 'win' ];
+    let event = {
+      id: createId(),
+      type: '',
+      x: 0,
+      y: 0 
+    }
+
     // tile config
     const tileSize = 32;
     const mapHeight = 13;
@@ -36,6 +45,7 @@ export class AppComponent {
     let boxGroup;
 
     let fires = [];
+    let bombDuration = 2;
 
     // player
     let playerStatus: PlayerModule = {
@@ -88,7 +98,7 @@ export class AppComponent {
       });
 
       // player
-      player = game.add.sprite(32*2, 32*3, 'player');
+      player = game.add.sprite(tileSize*2, tileSize*3, 'player');
       game.physics.arcade.enable(player);
 
       player.body.collideWorldBounds = true;
@@ -155,12 +165,14 @@ export class AppComponent {
 
       playerStatus.bombs--;
 
-      let x = player.position.x - player.position.x % 32;
-      let y = player.position.y - player.position.y % 32;
+      let x = player.position.x - player.position.x % tileSize;
+      let y = player.position.y - player.position.y % tileSize;
 
       let bomb = game.add.sprite(x, y, 'bomb');
 
-      createEvent(2, detonateBomb, this, bomb);
+      createEvent(bombDuration, detonateBomb, this, bomb);
+
+      sendMessage(eventType[0], x, y);
     }
 
     function detonateBomb(bomb) {
@@ -172,13 +184,13 @@ export class AppComponent {
 
       for(let i = 1; i <= playerStatus.range; i++) {
         let x = bomb.position.x;
-        let y = bomb.position.y + 32 * i;
+        let y = bomb.position.y + tileSize * i;
         if (!explode(x, y)) break;;  
         addFire(x, y);
       }
 
       for(let i = 1; i <= playerStatus.range; i++) {
-        let x = bomb.position.x + 32 * i;
+        let x = bomb.position.x + tileSize * i;
         let y = bomb.position.y;
         if (!explode(x, y)) break;;  
         addFire(x, y);
@@ -186,13 +198,13 @@ export class AppComponent {
 
       for(let i = 1; i <= playerStatus.range; i++) {
         let x = bomb.position.x;
-        let y = bomb.position.y - 32 * i;
+        let y = bomb.position.y - tileSize * i;
         if (!explode(x, y)) break;;  
         addFire(x, y);
       }
 
       for(let i = 1; i <= playerStatus.range; i++) {
-        let x = bomb.position.x -  32 * i;
+        let x = bomb.position.x -  tileSize * i;
         let y = bomb.position.y;
         if (!explode(x, y)) break;;  
         addFire(x, y);
@@ -225,6 +237,38 @@ export class AppComponent {
 
     function createEvent(seconds, callback, context, params) {
       game.time.events.add(Phaser.Timer.SECOND * seconds, callback, context, params);
+    }
+
+
+    // websocket action
+
+    function createId() {
+      return `${Date.now()}${Math.floor(Math.random() * Math.floor(1000))}`
+    }
+
+    function sendMessage(type, x, y) {
+      event.type = type;
+      event.x = x;
+      event.y = y;
+      gameService.sendMsg(event)
+    }
+
+    this.gameService.messages.subscribe(res => {
+      let data = JSON.parse(res.text);
+      console.log(data);
+
+      if (data.id === event.id) return;
+
+      if (data.type === eventType[0]) {
+        createFakeBomb(data);
+        return;
+      }
+
+    })
+
+    function createFakeBomb(data) {
+      let bomb = game.add.sprite(data.x, data.y, 'bomb');
+      createEvent(bombDuration, (bomb)=>bomb.destroy(), this, bomb);
     }
 
   }
