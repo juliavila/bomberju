@@ -26,6 +26,7 @@ export class AppComponent {
   buildPhaser(controller, gameService) {
 
     // websocket init config
+    // TODO: transformar em enum
     let eventType = [ 'bomb', 'fire', 'destroyBox', 'player', 'win' ];
     let event = {
       id: createId(),
@@ -57,6 +58,7 @@ export class AppComponent {
 
     let player;
     let otherPlayer;
+    let putOff =  false;
 
     let game = new Phaser.Game(tileSize*mapWidth, tileSize*mapHeight, Phaser.AUTO, 'content', {
       preload: preload,
@@ -109,7 +111,7 @@ export class AppComponent {
       player.body.onCollide.add(checkPlayerCollision, this);
 
       // TODO: inicializar em lugares opostos
-      // otherPlayer = game.add.sprite(tileSize*2, tileSize*3, 'player');
+      otherPlayer = game.add.sprite(tileSize*2, tileSize*3, 'player');
 
       // keyboard
       cursors = game.input.keyboard.createCursorKeys();
@@ -134,6 +136,7 @@ export class AppComponent {
       if (other.key === 'explosion') {
         controller.dead = true;
         player.renderable = false;
+        sendMessage(eventType[4], 0, 0)
       }
     }
 
@@ -170,9 +173,14 @@ export class AppComponent {
       }
 
       // TODO: atualizar somente a cada x tempo;
-      // if (moved){
-      //   sendMessage(eventType[3], player.position.x, player.position.y);
-      // }
+      console.log(putOff);
+      if (moved && !putOff){
+        console.log('send player move')
+        sendMessage(eventType[3], player.position.x, player.position.y);
+
+        putOff = true;
+        setTimeout(() => putOff = false, 10);
+      }
     }
 
     function spanwBomb() {
@@ -307,9 +315,15 @@ export class AppComponent {
 
       // other player
       if (data.type === eventType[3] && otherPlayer !== undefined) {
+        console.log('')
         otherPlayer.position.x = data.x;
         otherPlayer.position.y = data.y;
         return;
+      }
+
+      if (data.type === eventType[4]) {
+        controller.winner = true;
+        otherPlayer.destroy();
       }
 
     })
