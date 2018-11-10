@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core";
 import { EventModel } from "../../model/event.model";
 import { MessageService } from "./message.service";
-import { EventTypeEnum } from "../../enums/event-type.enum";
-import { Observable, Subject } from "../../../../../node_modules/rxjs";
+import { Subject } from "../../../../../node_modules/rxjs";
 
 @Injectable()
 export class MessageManagerService {

@@ -4,6 +4,7 @@ export enum EventTypeEnum {
   FIRE = 'FIRE',
   DESTROY_BOX = 'DESTROY_BOX',
   PLAYER = 'PLAYER',
-  WIN = 'WIN'
+  WIN = 'WIN',
+  START = 'START'
 
 }

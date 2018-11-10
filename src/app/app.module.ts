@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { MessageService } from './shared/services/game/message.service';
 import { WebsocketService } from './shared/services/websocket.service';
 import { MessageManagerService } from './shared/services/game/message-manager.service';
+import { GameConfigService } from './shared/services/game/game-config.service';
 
 
 @NgModule({
@@ -19,7 +20,8 @@ import { MessageManagerService } from './shared/services/game/message-manager.se
   providers: [ 
     MessageService,
     MessageManagerService,
-    WebsocketService
+    WebsocketService,
+    GameConfigService
   ],
   bootstrap: [AppComponent]
 })

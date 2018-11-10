@@ -1,6 +1,4 @@
-import { EventModel } from './shared/model/event.model';
 // tslint:disable:curly
-
 import { Component } from '@angular/core';
 import 'phaser-ce/build/custom/pixi';
 import 'phaser-ce/build/custom/p2';
@@ -9,6 +7,8 @@ import { PlayerModule } from './player/player.module';
 import { EventTypeEnum } from './shared/enums/event-type.enum';
 import { MessageManagerService } from './shared/services/game/message-manager.service';
 import { environment } from '../environments/environment.prod';
+import { GameStatusModel } from './shared/model/game-statu.model';
+import { GameConfigService } from './shared/services/game/game-config.service';
 
 @Component({
   selector: 'app-root',
@@ -17,26 +17,20 @@ import { environment } from '../environments/environment.prod';
 })
 export class AppComponent {
 
-  controller = {
-    dead: false,
-    winner: false
-  };
-
   title = 'app';
+  gameStatus = new GameStatusModel();
 
-  constructor(messageManager: MessageManagerService) {
+  constructor(messageManager: MessageManagerService, gameConfig: GameConfigService) {
 
-    this.buildPhaser(
-      this.controller, messageManager);
+    this.buildPhaser(this.gameStatus, messageManager, gameConfig);
   }
 
-  buildPhaser(controller, messageManager: MessageManagerService) {    
+  buildPhaser(gameStatus: GameStatusModel,
+    messageManager: MessageManagerService,
+    gameConfig: GameConfigService) {    
     
-
-    let map;
-    let layer;
-    let cursors;
-    let boxGroup;
+    gameStatus.dead = false;
+    gameStatus.winner = false;
 
     const fires = [];
     
@@ -47,86 +41,58 @@ export class AppComponent {
       range: 1
     };
 
-    let player;
-    let otherPlayer;
     let putOff = false;
 
-    const game = new Phaser.Game(environment.tile.tileSize * environment.tile.mapWidth, environment.tile.tileSize * environment.tile.mapHeight, Phaser.AUTO, 'content', {
+    gameConfig.game = new Phaser.Game(environment.tile.tileSize * environment.tile.mapWidth, environment.tile.tileSize * environment.tile.mapHeight, Phaser.AUTO, 'content', {
       preload: preload,
       create: create,
       update: update
     });
 
     function preload() {
-
-      game.load.tilemap('map', 'assets/tilemaps/tilemap.json', null, Phaser.Tilemap.TILED_JSON);
-      game.load.image('tiles', 'assets/tilemaps/map.png');
-      game.load.image('player', 'assets/player-mini.png');
-      game.load.image('bomb', 'assets/bomb.png');
-      game.load.image('explosion', 'assets/explosion.png');
-      game.load.image('box', 'assets/box.png');
-
+      gameConfig.loadAssets();
     }
 
     function create() {
 
-      game.physics.startSystem(Phaser.Physics.ARCADE);
+      gameConfig.game.physics.startSystem(Phaser.Physics.ARCADE);
 
       // tilemap
-      game.stage.backgroundColor = '#28b162';
-      map = game.add.tilemap('map');
-      map.addTilesetImage('map', 'tiles');
-
-      map.setCollisionBetween(2, 3);
-      layer = map.createLayer('map1');
-
-      layer.resizeWorld();
+      gameConfig.loadTileMap();
 
       // obstacles
-      boxGroup = game.add.group();
-      boxGroup.enableBody = true;
-      map.createFromObjects('boxLayer', 3, 'box', 0, true, false, boxGroup);
-
-      boxGroup.forEach(box => {
-        game.physics.arcade.enable(box);
-        box.body.immovable = true;
-      });
+      gameConfig.defineObstacles();
 
       // player
-      player = game.add.sprite(environment.tile.tileSize * 2, environment.tile.tileSize * 3, 'player');
-      game.physics.arcade.enable(player);
-
-      player.body.collideWorldBounds = true;
-
-      player.body.onCollide = new Phaser.Signal();
-      player.body.onCollide.add(checkPlayerCollision, this);
+      gameConfig.definePlayer();
+      gameConfig.definePlayerCollision(checkPlayerCollision);
 
       // TODO: inicializar em lugares opostos
-      otherPlayer = game.add.sprite(environment.tile.tileSize * 2, environment.tile.tileSize * 3, 'player');
+      gameConfig.defineOtherPlayer();
 
       // keyboard
-      cursors = game.input.keyboard.createCursorKeys();
+      gameConfig.defineCursors();
 
     }
 
     function update() {
 
-      if (controller.dead) return;
+      if (gameStatus.dead) return;
 
       // collisions
-      game.physics.arcade.collide(player, layer);
-      game.physics.arcade.collide(player, boxGroup);
+      gameConfig.game.physics.arcade.collide(gameConfig.player, gameConfig.layer);
+      gameConfig.game.physics.arcade.collide(gameConfig.player, gameConfig.boxGroup);
 
-      fires.forEach(fire => game.physics.arcade.collide(player, fire));
+      fires.forEach(fire => gameConfig.game.physics.arcade.collide(gameConfig.player, fire));
 
-      checkKeyboard(cursors);
+      checkKeyboard(gameConfig.cursors);
 
     }
 
     function checkPlayerCollision(p, other) {
       if (other.key === 'explosion') {
-        controller.dead = true;
-        player.renderable = false;
+        gameStatus.dead = true;
+        gameConfig.player.renderable = false;
         messageManager.sendMessage(EventTypeEnum.WIN, 0, 0);
       }
     }
@@ -136,30 +102,30 @@ export class AppComponent {
 
       // moves
       if (cursors.up.isDown) {
-        player.body.velocity.y = -150;
+        gameConfig.player.body.velocity.y = -150;
         moved = true;
       } else if (cursors.down.isDown) {
-        player.body.velocity.y = 150;
+        gameConfig.player.body.velocity.y = 150;
         moved = true;
       } else if (cursors.left.isDown) {
-        player.body.velocity.x = -150;
+        gameConfig.player.body.velocity.x = -150;
         moved = true;
       } else if (cursors.right.isDown) {
-        player.body.velocity.x = 150;
+        gameConfig.player.body.velocity.x = 150;
         moved = true;
       } else {
-        player.body.velocity.x = 0;
-        player.body.velocity.y = 0;
+        gameConfig.player.body.velocity.x = 0;
+        gameConfig.player.body.velocity.y = 0;
       }
 
       // spawn bomb
-      game.input.keyboard.onDownCallback = function (e) {
+      gameConfig.game.input.keyboard.onDownCallback = function (e) {
         if (e.keyCode === 32) spanwBomb();
       };
 
       // atualiza somente a cada x tempo;
       if (moved && !putOff) {
-        messageManager.sendMessage(EventTypeEnum.PLAYER, player.position.x, player.position.y);
+        messageManager.sendMessage(EventTypeEnum.PLAYER, gameConfig.player.position.x, gameConfig.player.position.y);
 
         putOff = true;
         setTimeout(() => putOff = false, 10);
@@ -171,10 +137,10 @@ export class AppComponent {
 
       playerStatus.bombs--;
 
-      const x = player.position.x - player.position.x % environment.tile.tileSize;
-      const y = player.position.y - player.position.y % environment.tile.tileSize;
+      const x = gameConfig.player.position.x - gameConfig.player.position.x % environment.tile.tileSize;
+      const y = gameConfig.player.position.y - gameConfig.player.position.y % environment.tile.tileSize;
 
-      const bomb = game.add.sprite(x, y, 'bomb');
+      const bomb = gameConfig.game.add.sprite(x, y, 'bomb');
 
       createEvent(environment.game.bombDuration, detonateBomb, this, bomb);
 
@@ -227,7 +193,7 @@ export class AppComponent {
           messageManager.sendMessage(EventTypeEnum.FIRE, x, y);
           return true;
         } else {
-          const tile = map.getTile(x / environment.tile.tileSize, y / environment.tile.tileSize, layer);
+          const tile = gameConfig.map.getTile(x / environment.tile.tileSize, y / environment.tile.tileSize, gameConfig.layer);
           if (tile.index === 2) return false;
         }
         return true;
@@ -241,19 +207,19 @@ export class AppComponent {
 
     function createFire(x: number, y: number) {
 
-      const fire = game.add.sprite(x, y, 'explosion');
-      game.physics.arcade.enable(fire);
+      const fire = gameConfig.game.add.sprite(x, y, 'explosion');
+      gameConfig.game.physics.arcade.enable(fire);
       fires.push(fire);
 
       return fire;
     }
 
     function findBox(x: number, y: number) {
-      return boxGroup.filter(box => (box.position.x === x && box.position.y === y)).list[0];
+      return gameConfig.boxGroup.filter(box => (box.position.x === x && box.position.y === y)).list[0];
     }
 
     function createEvent(seconds, callback, context, params) {
-      game.time.events.add(Phaser.Timer.SECOND * seconds, callback, context, params);
+      gameConfig.game.time.events.add(Phaser.Timer.SECOND * seconds, callback, context, params);
     }
 
     messageManager.event.subscribe(data => {
@@ -280,21 +246,21 @@ export class AppComponent {
       }
   
       // other player
-      if (data.type === EventTypeEnum.PLAYER && otherPlayer !== undefined) {
-        otherPlayer.position.x = data.x;
-        otherPlayer.position.y = data.y;
+      if (data.type === EventTypeEnum.PLAYER && gameConfig.otherPlayer !== undefined) {
+        gameConfig.otherPlayer.position.x = data.x;
+        gameConfig.otherPlayer.position.y = data.y;
         return;
       }
   
       if (data.type === EventTypeEnum.WIN) {
-        controller.winner = true;
-        otherPlayer.destroy();
+        gameStatus.winner = true;
+        gameConfig.otherPlayer.destroy();
       }
 
     });
 
     function createFakeBomb(x, y) {
-      const bomb = game.add.sprite(x, y, 'bomb');
+      const bomb = gameConfig.game.add.sprite(x, y, 'bomb');
       createEvent(environment.game.bombDuration, (bomb) => bomb.destroy(), this, bomb);
     }
 
