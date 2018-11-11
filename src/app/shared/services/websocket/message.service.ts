@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { WebsocketService } from '../websocket.service';
+import { WebsocketService } from './websocket.service';
 
 @Injectable()
 export class MessageService {

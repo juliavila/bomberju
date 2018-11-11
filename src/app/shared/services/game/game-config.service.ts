@@ -2,7 +2,8 @@ import { Injectable } from "@angular/core";
 import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 import { environment } from "../../../../environments/environment.prod";
 import { EventTypeEnum } from "../../enums/event-type.enum";
-import { MessageManagerService } from "./message-manager.service";
+import { MessageManagerService } from "../websocket/message-manager.service";
+import { PlayerModule } from "../../../player/player.module";
 
 @Injectable()
 export class GameConfigService {
@@ -13,9 +14,17 @@ export class GameConfigService {
   layer;
   cursors;
   boxGroup;
+  
+  fires = [];
 
   player;
   otherPlayer;
+
+  playerStatus: PlayerModule = {
+    position: { x: 1, y: 1 },
+    bombs: 1,
+    range: 1
+  };
 
   constructor(private messageManager: MessageManagerService) { }
   
