@@ -3,7 +3,7 @@ import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 import { environment } from "../../../../environments/environment.prod";
 import { EventTypeEnum } from "../../enums/event-type.enum";
 import { MessageManagerService } from "../websocket/message-manager.service";
-import { PlayerModule } from "../../../player/player.module";
+import { PlayerModule } from "../../model/player.model";
 
 @Injectable()
 export class GameConfigService {

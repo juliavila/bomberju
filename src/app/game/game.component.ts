@@ -8,9 +8,9 @@ import { GameConfigService } from "../shared/services/game/game-config.service";
 import { ExplosionService } from "../shared/services/bomb/explosion.service";
 import { UtilService } from "../shared/services/game/util.service";
 import { gameControllerService } from "../shared/services/game/game-controller.service";
-import { PlayerModule } from "../player/player.module";
 import { environment } from "../../environments/environment.prod";
 import { EventTypeEnum } from "../shared/enums/event-type.enum";
+import { PlayerModule } from "../shared/model/player.model";
 
 @Component({
   selector: 'game-component',
