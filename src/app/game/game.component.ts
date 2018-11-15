@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 
 import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 
@@ -11,34 +11,48 @@ import { gameControllerService } from "../shared/services/game/game-controller.s
 import { environment } from "../../environments/environment.prod";
 import { EventTypeEnum } from "../shared/enums/event-type.enum";
 import { PlayerModule } from "../shared/model/player.model";
+import { GameStatusEnum } from "../shared/enums/game-status.enum";
 
 @Component({
   selector: 'game-component',
   templateUrl: './game.component.html',
   // styleUrls: ['./app.component.scss']
 })
-export class GameComponent {
+export class GameComponent implements OnInit, OnDestroy {
 
   title = 'app';
-  gameStatus = new GameStatusModel();
+  gameStatus: GameStatusEnum;
+  gameStatusEnum = GameStatusEnum;
 
-  constructor(messageManager: MessageManagerService, 
-    gameConfig: GameConfigService,
-    gameController: gameControllerService,
-    explosionService: ExplosionService,
-    util: UtilService) {
+  constructor(private messageManager: MessageManagerService, 
+    private gameConfig: GameConfigService,
+    private gameController: gameControllerService,
+    private explosionService: ExplosionService,
+    private util: UtilService) {
 
-    this.buildPhaser(this.gameStatus, messageManager, gameConfig, gameController, explosionService, util);
   }
-  buildPhaser(gameStatus: GameStatusModel,
+    
+  ngOnInit() {    
+    this.buildPhaser(this.gameStatus, 
+      this.messageManager, 
+      this.gameConfig, 
+      this.gameController, 
+      this.explosionService, 
+      this.util);
+  }
+
+  ngOnDestroy() {
+
+  }
+
+  buildPhaser(gameStatus: GameStatusEnum,
     messageManager: MessageManagerService,
     gameConfig: GameConfigService,
     gameController: gameControllerService,
     explosionService: ExplosionService,
     util: UtilService) {    
     
-    gameStatus.dead = false;
-    gameStatus.winner = false;
+    gameStatus = GameStatusEnum.PLAYING;
     
     // player
     const playerStatus: PlayerModule = {
@@ -78,12 +92,11 @@ export class GameComponent {
 
       // keyboard
       gameConfig.defineCursors();
-
     }
 
     function update() {
 
-      if (gameStatus.dead) return;
+      if (gameStatus !== GameStatusEnum.PLAYING) gameConfig.game.destroy();
 
       // collisions
       gameController.checkCollisions();
@@ -98,7 +111,7 @@ export class GameComponent {
 
     function checkPlayerCollision(p, other) {
       if (other.key === 'explosion') {
-        gameStatus.dead = true;
+        gameStatus = GameStatusEnum.LOSE;
         gameConfig.player.renderable = false;
         messageManager.sendMessage(EventTypeEnum.WIN, 0, 0);
       }
@@ -134,7 +147,7 @@ export class GameComponent {
       }
   
       if (data.type === EventTypeEnum.WIN) {
-        gameStatus.winner = true;
+        gameStatus = GameStatusEnum.WIN;
         gameConfig.otherPlayer.destroy();
       }
 

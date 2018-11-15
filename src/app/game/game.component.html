@@ -2,5 +2,5 @@
 
 <div id="gameHolder"></div>
 
-<h1 *ngIf="gameStatus.winner">you win</h1>
-<h2 *ngIf="gameStatus.dead">you loose :'(</h2>
+<h1 *ngIf="gameStatus === gameStatusEnum.WIN">you win</h1>
+<h2 *ngIf="gameStatus === gameStatusEnum.LOSE">you lose :'(</h2>
