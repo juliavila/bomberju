@@ -14,7 +14,6 @@ export class ExplosionService {
     private messageManager: MessageManagerService) { }
 
   spanwBomb() {
-    console.log('spanw')
     if (!this.gameConfig.playerStatus.bombs) return;
 
     this.gameConfig.playerStatus.bombs--;

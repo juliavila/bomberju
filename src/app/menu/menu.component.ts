@@ -1,4 +1,6 @@
 import { Component } from "@angular/core";
+import { RoomService } from "../shared/services/room.service";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'menu-component',
@@ -6,7 +8,14 @@ import { Component } from "@angular/core";
   // styleUrls: ['./app.component.scss']
 })
 export class MenuComponent {
-  constructor() {
-    console.log('in menu component')
+  constructor(private roomService: RoomService,
+    private router: Router) { }
+
+  enterRoom() {
+    this.roomService.enterRoom();
+  }
+
+  play() {
+    this.router.navigate(['../play']);
   }
 }

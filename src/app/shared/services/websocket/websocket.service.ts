@@ -13,11 +13,11 @@ export class WebsocketService {
   constructor() { }
 
   connect(): Rx.Subject<MessageEvent> {
-    this.socket = io(environment.ws_url);
+    this.socket = io(environment.websocketUrl);
 
     let observable = new Observable(observer => {
       this.socket.on('message', (data) => {
-        console.log("Received message from Websocket Server")
+        // console.log("Received message from Websocket Server")
         observer.next(data);
       })
       return () => {

@@ -1,6 +1,8 @@
+import { RoomModel } from "./room.model";
+
 export class EventModel {
 
-  id: string;
+  room: RoomModel
   type: string;
   x: number;
   y: number;

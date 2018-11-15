@@ -15,6 +15,9 @@ import { RouterModule, Routes } from '@angular/router';
 import { GameComponent } from './game/game.component';
 import { MenuComponent } from './menu/menu.component';
 import { AppRoutingModule } from './app-routing.module';
+import { RoomService } from './shared/services/room.service';
+
+import { HttpModule } from '@angular/http';
 
 @NgModule({
   declarations: [
@@ -34,7 +37,8 @@ import { AppRoutingModule } from './app-routing.module';
     GameConfigService,
     gameControllerService,
     ExplosionService,
-    UtilService
+    UtilService,
+    RoomService
   ],
   bootstrap: [AppComponent]
 })

@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 
 import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 
-import { GameStatusModel } from "../shared/model/game-statu.model";
+import { GameStatusModel } from "../shared/model/game-status.model";
 import { MessageManagerService } from "../shared/services/websocket/message-manager.service";
 import { GameConfigService } from "../shared/services/game/game-config.service";
 import { ExplosionService } from "../shared/services/bomb/explosion.service";
@@ -106,8 +106,6 @@ export class GameComponent {
 
     // TODO: passar pra uma service
     messageManager.event.subscribe(data => {
-
-      console.log(data);
 
       if (data.type === EventTypeEnum.BOMB) {
         explosionService.createFakeBomb(data.x, data.y);

@@ -1,6 +1,8 @@
 export const environment = {
   production: true,
-  ws_url: 'http://localhost:4000/',
+  
+  websocketUrl: 'http://localhost:4000/',
+  baseUrl: 'http://localhost:3000/',
 
   game: {
     bombDuration: 2,
