@@ -4,15 +4,15 @@ import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 import { GameConfigService } from "./game-config.service";
 import { MessageManagerService } from "../websocket/message-manager.service";
 import { EventTypeEnum } from "../../enums/event-type.enum";
-import { ExplosionService } from "../bomb/explosion.service";
+import { GameStatusEnum } from "../../enums/game-status.enum";
 
 @Injectable()
 export class gameControllerService {
 
   putOff = false;
+  gameStatus: GameStatusEnum;
 
   constructor(private gameConfig: GameConfigService,
-    private explosionService: ExplosionService,
     private messageManager: MessageManagerService,) { }
 
   checkCollisions() {

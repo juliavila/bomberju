@@ -5,6 +5,6 @@ export enum EventTypeEnum {
   DESTROY_BOX = 'DESTROY_BOX',
   PLAYER = 'PLAYER',
   WIN = 'WIN',
-  START = 'START'
-
+  START = 'START',
+  READY = 'READY'
 }

@@ -1,6 +1,20 @@
 <!--The content below is only a placeholder and can be replaced.-->
 
-<div id="gameHolder"></div>
+<!-- <div id="gameHolder"></div> -->
+<pre>
+    gameStatus: {{ gameController.gameStatus }}
+</pre>
+
+<button type="button" 
+  (click)="enterRoom()" 
+  [hidden]="hidePlayButton()">
+  Play!
+</button>
+
+<div *ngIf="gameStatus === gameStatusEnum.WAITING">
+  <p>wait...</p>
+  <p>we're finding for a room</p>
+</div>
 
 <h1 *ngIf="gameStatus === gameStatusEnum.WIN">you win</h1>
 <h2 *ngIf="gameStatus === gameStatusEnum.LOSE">you lose :'(</h2>

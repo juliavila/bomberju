@@ -11,10 +11,6 @@ export class MenuComponent {
   constructor(private roomService: RoomService,
     private router: Router) { }
 
-  enterRoom() {
-    this.roomService.enterRoom();
-  }
-
   play() {
     this.router.navigate(['../play']);
   }

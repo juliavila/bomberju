@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 
@@ -12,6 +12,7 @@ import { environment } from "../../environments/environment.prod";
 import { EventTypeEnum } from "../shared/enums/event-type.enum";
 import { PlayerModule } from "../shared/model/player.model";
 import { GameStatusEnum } from "../shared/enums/game-status.enum";
+import { RoomService } from "../shared/services/room.service";
 
 @Component({
   selector: 'game-component',
@@ -20,39 +21,56 @@ import { GameStatusEnum } from "../shared/enums/game-status.enum";
 })
 export class GameComponent implements OnInit, OnDestroy {
 
-  title = 'app';
-  gameStatus: GameStatusEnum;
   gameStatusEnum = GameStatusEnum;
-
-  constructor(private messageManager: MessageManagerService, 
+  
+  constructor(private roomService: RoomService,
+    private messageManager: MessageManagerService, 
     private gameConfig: GameConfigService,
     private gameController: gameControllerService,
     private explosionService: ExplosionService,
-    private util: UtilService) {
-
-  }
+    private util: UtilService) { }
     
-  ngOnInit() {    
-    this.buildPhaser(this.gameStatus, 
-      this.messageManager, 
-      this.gameConfig, 
-      this.gameController, 
-      this.explosionService, 
-      this.util);
+  ngOnInit() { 
+    localStorage.clear();
   }
 
-  ngOnDestroy() {
-
+  ngOnDestroy() { 
+    localStorage.clear();
   }
 
-  buildPhaser(gameStatus: GameStatusEnum,
+  enterRoom() {
+    this.roomService.enterRoom();
+    this.gameController.gameStatus = GameStatusEnum.WAITING;
+    this.messageManager.sendMessage(EventTypeEnum.READY);    
+    this.checkGameInit();
+  }
+
+  checkGameInit() {
+    this.messageManager.event.subscribe(data => {
+      console.log('checkGameInit', data)
+      if (data.type === EventTypeEnum.START) 
+        this.buildPhaser(
+          this.messageManager, 
+          this.gameConfig, 
+          this.gameController, 
+          this.explosionService, 
+          this.util);
+    });
+  }
+
+  hidePlayButton() {
+    return this.gameController.gameStatus === GameStatusEnum.WAITING 
+        || this.gameController.gameStatus === GameStatusEnum.PLAYING
+  }
+
+  buildPhaser(
     messageManager: MessageManagerService,
     gameConfig: GameConfigService,
     gameController: gameControllerService,
     explosionService: ExplosionService,
     util: UtilService) {    
     
-    gameStatus = GameStatusEnum.PLAYING;
+    gameController.gameStatus = GameStatusEnum.PLAYING;
     
     // player
     const playerStatus: PlayerModule = {
@@ -63,7 +81,10 @@ export class GameComponent implements OnInit, OnDestroy {
 
     let putOff = false;
 
-    gameConfig.game = new Phaser.Game(environment.tile.tileSize * environment.tile.mapWidth, environment.tile.tileSize * environment.tile.mapHeight, Phaser.AUTO, 'content', {
+    const screenWidth = environment.tile.tileSize * environment.tile.mapWidth;
+    const screenHeight = environment.tile.tileSize * environment.tile.mapHeight;
+
+    gameConfig.game = new Phaser.Game(screenWidth, screenHeight, Phaser.AUTO, 'content', {
       preload: preload,
       create: create,
       update: update
@@ -96,7 +117,11 @@ export class GameComponent implements OnInit, OnDestroy {
 
     function update() {
 
-      if (gameStatus !== GameStatusEnum.PLAYING) gameConfig.game.destroy();
+      if (gameController.gameStatus !== GameStatusEnum.PLAYING) {
+        // TODO: substituir esse destroy por um reload do componente, que tal?
+        gameConfig.game.destroy();
+        return;
+      }
 
       // collisions
       gameController.checkCollisions();
@@ -111,9 +136,9 @@ export class GameComponent implements OnInit, OnDestroy {
 
     function checkPlayerCollision(p, other) {
       if (other.key === 'explosion') {
-        gameStatus = GameStatusEnum.LOSE;
+        gameController.gameStatus = GameStatusEnum.LOSE;
         gameConfig.player.renderable = false;
-        messageManager.sendMessage(EventTypeEnum.WIN, 0, 0);
+        messageManager.sendMessage(EventTypeEnum.WIN);
       }
     }
 
@@ -147,7 +172,7 @@ export class GameComponent implements OnInit, OnDestroy {
       }
   
       if (data.type === EventTypeEnum.WIN) {
-        gameStatus = GameStatusEnum.WIN;
+        gameController.gameStatus = GameStatusEnum.WIN;
         gameConfig.otherPlayer.destroy();
       }
 
