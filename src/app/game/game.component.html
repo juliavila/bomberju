@@ -1,20 +1,46 @@
 <!--The content below is only a placeholder and can be replaced.-->
 
 <!-- <div id="gameHolder"></div> -->
-<pre>
+
+<div class="content">
+
+  <pre>
     gameStatus: {{ gameController.gameStatus }}
-</pre>
+  </pre>
 
-<button type="button" 
-  (click)="enterRoom()" 
-  [hidden]="hidePlayButton()">
-  Play!
-</button>
+  <!-- <div class="title">
+    <h1 class="border">BomberJu</h1>
+    <h1 class="fill">BomberJu</h1>    
+  </div>
+  
+  
+  <button type="button" 
+    class="play-button"
+    (click)="enterRoom()" 
+    [hidden]="hidePlayButton()">
+    Play!
+  </button> -->
 
-<div *ngIf="gameStatus === gameStatusEnum.WAITING">
-  <p>wait...</p>
-  <p>we're finding for a room</p>
+  <div *ngIf="gameStatus === gameStatusEnum.WAITING">
+    <p class="waiting">waiting...</p>
+    <p>we're finding for a room</p>
+  </div>
+
+  <ng-container *ngIf="gameStatus === gameStatusEnum.WIN">
+    <h3 class="lose">You win</h3>
+    <img [src]="winGif" alt="#dancing">
+  </ng-container>
+
+  <ng-container *ngIf="gameStatus === gameStatusEnum.LOSE">
+    <h3 class="lose">YOU LOSE =(</h3>
+    <img src="https://media.giphy.com/media/OPU6wzx8JrHna/giphy.gif" alt="#sad">
+  </ng-container>
+
+  <button type="button" 
+    class="play-again-button"
+    (click)="enterRoom()" 
+    [hidden]="hidePlayButton()">
+    Play Again
+  </button>
+
 </div>
-
-<h1 *ngIf="gameStatus === gameStatusEnum.WIN">you win</h1>
-<h2 *ngIf="gameStatus === gameStatusEnum.LOSE">you lose :'(</h2>

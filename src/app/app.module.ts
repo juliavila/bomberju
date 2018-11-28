@@ -11,19 +11,17 @@ import { WebsocketService } from './shared/services/websocket/websocket.service'
 import { ExplosionService } from './shared/services/bomb/explosion.service';
 import { UtilService } from './shared/services/game/util.service';
 
-import { RouterModule, Routes } from '@angular/router';
 import { GameComponent } from './game/game.component';
-import { MenuComponent } from './menu/menu.component';
 import { AppRoutingModule } from './app-routing.module';
 import { RoomService } from './shared/services/room.service';
 
 import { HttpModule } from '@angular/http';
+import { GifService } from './shared/services/gif.service';
 
 @NgModule({
   declarations: [
     AppComponent,
-    GameComponent,
-    MenuComponent
+    GameComponent
   ],
   imports: [
     BrowserModule,
@@ -38,7 +36,8 @@ import { HttpModule } from '@angular/http';
     gameControllerService,
     ExplosionService,
     UtilService,
-    RoomService
+    RoomService,
+    GifService
   ],
   bootstrap: [AppComponent]
 })

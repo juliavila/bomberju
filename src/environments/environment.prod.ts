@@ -4,6 +4,8 @@ export const environment = {
   websocketUrl: 'http://localhost:4000/',
   baseUrl: 'http://localhost:3000/',
 
+  giphyApiKey: 'iitc6kzRhAFb56HcBs7V91r0IDMzEPTq',
+
   game: {
     bombDuration: 2,
     fireDuration: .3

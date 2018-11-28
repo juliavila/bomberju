@@ -1,0 +1,110 @@
+* {
+  font-family: 'Raleway', sans-serif;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  width: 100%;
+}
+
+img {
+  align-self: center;
+}
+
+.title {
+  position: relative;
+  width: 100%;
+  margin-top: 20vh;
+
+  h1 {
+    font-family: 'Luckiest Guy', cursive;
+    font-size: 4em;
+    text-align: center;
+  }
+
+  .border {
+    -webkit-text-stroke-width: 12px;
+    -webkit-text-stroke-color: #38F788;
+  }
+
+  .fill {
+    color: #28B162;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+  }
+
+}
+
+button {
+  border: none;
+  font-family: 'Raleway';
+  font-size: 20px;
+  padding: 10px 30px;
+  font-weight: bold;
+  margin: 22px 0;
+  color: white;
+}
+
+.play-button {
+  background: #E83F6F;
+  width: 100%;
+  margin: 22px 0;
+}
+
+.play-again-button {
+  align-self: center;
+  background: #FFBF00;
+
+  -webkit-animation-name: play-again; /* Safari 4.0 - 8.0 */
+  -webkit-animation-duration: .2s; /* Safari 4.0 - 8.0 */
+  -webkit-animation-iteration-count: infinite;
+  animation-name: play-again;
+  animation-duration: .2s;
+  animation-iteration-count: infinite;
+}
+
+/* Safari 4.0 - 8.0 */
+@-webkit-keyframes play-again {
+  50% { background: #E83F6F; }
+}
+
+/* Standard syntax */
+@keyframes play-again {
+  50% { background: #E83F6F; }
+}
+
+p, h3 {
+  color:white;
+  text-align: center;
+  margin: 10px;
+}
+
+.waiting {
+  -webkit-animation-name: waiting; /* Safari 4.0 - 8.0 */
+  -webkit-animation-duration: 4s; /* Safari 4.0 - 8.0 */
+  -webkit-animation-iteration-count: infinite;
+  animation-name: waiting;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+}
+
+/* Safari 4.0 - 8.0 */
+@-webkit-keyframes waiting {
+  0%   {font-size: 1em}
+  50%  {font-size: 1.5em;}
+}
+
+/* Standard syntax */
+@keyframes waiting {
+  0%   {font-size: 1em}
+  50%  {font-size: 1.5em;}
+}
+
+.lose {
+  font-family: 'Caveat Brush', cursive;
+  font-size: 4em;
+}

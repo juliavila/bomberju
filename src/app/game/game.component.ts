@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 
-import { GameStatusModel } from "../shared/model/game-status.model";
 import { MessageManagerService } from "../shared/services/websocket/message-manager.service";
 import { GameConfigService } from "../shared/services/game/game-config.service";
 import { ExplosionService } from "../shared/services/bomb/explosion.service";
@@ -13,25 +12,32 @@ import { EventTypeEnum } from "../shared/enums/event-type.enum";
 import { PlayerModule } from "../shared/model/player.model";
 import { GameStatusEnum } from "../shared/enums/game-status.enum";
 import { RoomService } from "../shared/services/room.service";
+import { GifService } from '../shared/services/gif.service';
 
 @Component({
   selector: 'game-component',
   templateUrl: './game.component.html',
-  // styleUrls: ['./app.component.scss']
+  styleUrls: ['./game.component.scss']
 })
 export class GameComponent implements OnInit, OnDestroy {
 
   gameStatusEnum = GameStatusEnum;
+  winGif: string;
+
+  words = ['victory','celebration','dancing','win'];
   
   constructor(private roomService: RoomService,
     private messageManager: MessageManagerService, 
     private gameConfig: GameConfigService,
     private gameController: gameControllerService,
     private explosionService: ExplosionService,
-    private util: UtilService) { }
+    private util: UtilService,
+    private gifService: GifService) { }
     
   ngOnInit() { 
     localStorage.clear();
+
+    this.refreshWinGif(this.words[(Math.random() * 4)]);
   }
 
   ngOnDestroy() { 
@@ -61,6 +67,14 @@ export class GameComponent implements OnInit, OnDestroy {
   hidePlayButton() {
     return this.gameController.gameStatus === GameStatusEnum.WAITING 
         || this.gameController.gameStatus === GameStatusEnum.PLAYING
+  }
+
+  refreshWinGif(search: string) {
+    this.gifService.getGif(search)
+      .then(
+        res => this.winGif = res.data.url, 
+        err => this.winGif = 'https://media.giphy.com/media/3oz8xwooUvMqNB1zEs/giphy.gif'
+      );
   }
 
   buildPhaser(
