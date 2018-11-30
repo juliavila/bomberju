@@ -25,16 +25,16 @@ export class gameControllerService {
     let moved = false;
 
     // moves
-    if (this.gameConfig.cursors.up.isDown) {
+    if (this.gameConfig.cursors.up.isDown || this.gameConfig.up) {
       this.gameConfig.player.body.velocity.y = -150;
       moved = true;
-    } else if (this.gameConfig.cursors.down.isDown) {
+    } else if (this.gameConfig.cursors.down.isDown || this.gameConfig.down) {
       this.gameConfig.player.body.velocity.y = 150;
       moved = true;
-    } else if (this.gameConfig.cursors.left.isDown) {
+    } else if (this.gameConfig.cursors.left.isDown || this.gameConfig.left) {
       this.gameConfig.player.body.velocity.x = -150;
       moved = true;
-    } else if (this.gameConfig.cursors.right.isDown) {
+    } else if (this.gameConfig.cursors.right.isDown || this.gameConfig.right) {
       this.gameConfig.player.body.velocity.x = 150;
       moved = true;
     } else {

@@ -44,6 +44,10 @@ export class GameComponent implements OnInit, OnDestroy {
     localStorage.clear();
   }
 
+  refresh(): void {
+    window.location.reload();
+  }
+
   enterRoom() {
     this.roomService.enterRoom();
     this.gameController.gameStatus = GameStatusEnum.WAITING;
@@ -54,19 +58,24 @@ export class GameComponent implements OnInit, OnDestroy {
   checkGameInit() {
     this.messageManager.event.subscribe(data => {
       console.log('checkGameInit', data)
-      if (data.type === EventTypeEnum.START) 
+      if (data.type === EventTypeEnum.START) {
         this.buildPhaser(
           this.messageManager, 
           this.gameConfig, 
           this.gameController, 
           this.explosionService, 
           this.util);
+      }
     });
   }
 
   hidePlayButton() {
-    return this.gameController.gameStatus === GameStatusEnum.WAITING 
-        || this.gameController.gameStatus === GameStatusEnum.PLAYING
+    return !!this.gameController.gameStatus;
+  }
+
+  showPlayAgain() {
+    return this.gameController.gameStatus === this.gameStatusEnum.WIN 
+        || this.gameController.gameStatus === this.gameStatusEnum.LOSE;
   }
 
   refreshWinGif(search: string) {
@@ -95,8 +104,10 @@ export class GameComponent implements OnInit, OnDestroy {
 
     let putOff = false;
 
-    const screenWidth = environment.tile.tileSize * environment.tile.mapWidth;
-    const screenHeight = environment.tile.tileSize * environment.tile.mapHeight;
+    const screenWidth = window.innerWidth * window.devicePixelRatio; //environment.tile.tileSize * environment.tile.mapWidth;
+    const screenHeight = window.innerHeight * window.devicePixelRatio; //environment.tile.tileSize * environment.tile.mapHeight;
+
+    // window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio, Phaser.CANVAS, 'gameArea'
 
     gameConfig.game = new Phaser.Game(screenWidth, screenHeight, Phaser.AUTO, 'content', {
       preload: preload,
@@ -106,6 +117,9 @@ export class GameComponent implements OnInit, OnDestroy {
 
     function preload() {
       gameConfig.loadAssets();
+
+      gameConfig.game.scale.scaleMode = Phaser.ScaleManager.NO_SCALE;
+      gameConfig.game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
     }
 
     function create() {
@@ -127,8 +141,20 @@ export class GameComponent implements OnInit, OnDestroy {
 
       // keyboard
       gameConfig.defineCursors();
-    }
 
+      gameConfig.defineButtons();
+      
+      // console.log('#################', gameConfig.game.scale.compatibility.supportsFullscreen)
+      // if (gameConfig.game.scale.compatibility.supportsFullscreen) {
+      //   gameConfig.game.scale.startFullscreen();
+      // }
+
+      gameConfig.game.world.setBounds(0, 0, environment.tile.tileSize * environment.tile.mapWidth, environment.tile.tileSize * environment.tile.mapHeight);
+
+      gameConfig.game.camera.follow(gameConfig.player);
+      // buttonleft.fixedToCamera = true;
+    }
+    
     function update() {
 
       if (gameController.gameStatus !== GameStatusEnum.PLAYING) {
@@ -145,6 +171,8 @@ export class GameComponent implements OnInit, OnDestroy {
       gameConfig.game.input.keyboard.onDownCallback = (e) => {
         if (e.keyCode === 32) explosionService.spanwBomb();
       };
+
+      if (gameConfig.action) explosionService.spanwBomb();
 
     }
 

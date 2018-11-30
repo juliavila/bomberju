@@ -1,8 +1,8 @@
 export const environment = {
   production: true,
   
-  websocketUrl: 'http://localhost:4000/',
-  baseUrl: 'http://localhost:3000/',
+  websocketUrl: 'http://192.168.15.12:4000/',
+  baseUrl: 'http://192.168.15.12:3000/',
 
   giphyApiKey: 'iitc6kzRhAFb56HcBs7V91r0IDMzEPTq',
 

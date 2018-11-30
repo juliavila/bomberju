@@ -20,6 +20,21 @@ export class GameConfigService {
   player;
   otherPlayer;
 
+  buttonUp;
+  buttonLeft;
+  buttonRight;
+  buttonDown;
+  buttonAction;
+
+  up;
+  left;
+  right;
+  down;
+  action;
+
+  screenWidth = window.innerWidth * window.devicePixelRatio;
+  screenHeight = window.innerHeight * window.devicePixelRatio;
+  
   playerStatus: PlayerModule = {
     position: { x: 1, y: 1 },
     bombs: 1,
@@ -35,6 +50,50 @@ export class GameConfigService {
     this.game.load.image('bomb', 'assets/bomb.png');
     this.game.load.image('explosion', 'assets/explosion.png');
     this.game.load.image('box', 'assets/box.png');
+
+    this.game.load.spritesheet('button-up', 'assets/onscreencontrols/transparentDark01.png',61,76);
+    this.game.load.spritesheet('button-left', 'assets/onscreencontrols/transparentDark03.png',76,61);
+    this.game.load.spritesheet('button-right', 'assets/onscreencontrols/transparentDark04.png',61,76);
+    this.game.load.spritesheet('button-down', 'assets/onscreencontrols/transparentDark08.png',76,61);
+
+    this.game.load.spritesheet('button-action', 'assets/onscreencontrols/transparentDark10.png',48,48);
+  }
+
+  defineButtons() {
+    this.buttonUp = this.game.add.button(50, this.screenHeight - 160, 'button-up', null, this, 0, 1, 0, 1);
+    this.buttonUp.fixedToCamera = true;
+    this.buttonUp.events.onInputOver.add(() => this.up = true);
+    this.buttonUp.events.onInputOut.add(() => this.up = false);
+    this.buttonUp.events.onInputDown.add(() => this.up = true);
+    this.buttonUp.events.onInputUp.add(() => this.up = false);
+
+    this.buttonLeft = this.game.add.button(0, this.screenHeight - 110, 'button-left', null, this, 0, 1, 0, 1);
+    this.buttonLeft.fixedToCamera = true;
+    this.buttonLeft.events.onInputOver.add(() => this.left = true);
+    this.buttonLeft.events.onInputOut.add(() => this.left = false);
+    this.buttonLeft.events.onInputDown.add(() => this.left = true);
+    this.buttonLeft.events.onInputUp.add(() => this.left = false);
+
+    this.buttonRight = this.game.add.button(85, this.screenHeight - 110, 'button-right', null, this, 0, 1, 0, 1);
+    this.buttonRight.fixedToCamera = true;
+    this.buttonRight.events.onInputOver.add(() => this.right = true);
+    this.buttonRight.events.onInputOut.add(() => this.right = false);
+    this.buttonRight.events.onInputDown.add(() => this.right = true);
+    this.buttonRight.events.onInputUp.add(() => this.right = false);
+
+    this.buttonDown = this.game.add.button(50, this.screenHeight - 76, 'button-down', null, this, 0, 1, 0, 1);
+    this.buttonDown.fixedToCamera = true;
+    this.buttonDown.events.onInputOver.add(() => this.down = true);
+    this.buttonDown.events.onInputOut.add(() => this.down = false);
+    this.buttonDown.events.onInputDown.add(() => this.down = true);
+    this.buttonDown.events.onInputUp.add(() => this.down = false);
+
+    this.buttonAction = this.game.add.button(this.screenWidth - 100, this.screenHeight - 100, 'button-action', null, this, 0, 1, 0, 1);
+    this.buttonAction.fixedToCamera = true;
+    this.buttonAction.events.onInputOver.add(() => this.action = true);
+    this.buttonAction.events.onInputOut.add(() => this.action = false);
+    this.buttonAction.events.onInputDown.add(() => this.action = true);
+    this.buttonAction.events.onInputUp.add(() => this.action = false);
   }
 
   loadTileMap() {
