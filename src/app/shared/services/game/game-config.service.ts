@@ -32,8 +32,8 @@ export class GameConfigService {
   down;
   action;
 
-  screenWidth = window.innerWidth * window.devicePixelRatio;
-  screenHeight = window.innerHeight * window.devicePixelRatio;
+  // screenWidth = window.innerWidth * window.devicePixelRatio;
+  // screenHeight = window.innerHeight * window.devicePixelRatio;
   
   playerStatus: PlayerModule = {
     position: { x: 1, y: 1 },
@@ -41,12 +41,16 @@ export class GameConfigService {
     range: 1
   };
 
+  positionPlayer1 = { x: 2, y: 3 };
+  positionPlayer2 = { x: 12, y: 9 };
+
   constructor(private messageManager: MessageManagerService) { }
   
   loadAssets() {
     this.game.load.tilemap('map', 'assets/tilemaps/tilemap.json', null, Phaser.Tilemap.TILED_JSON);
     this.game.load.image('tiles', 'assets/tilemaps/map.png');
     this.game.load.image('player', 'assets/player-mini.png');
+    this.game.load.image('other-player', 'assets/other-player-mini.png');
     this.game.load.image('bomb', 'assets/bomb.png');
     this.game.load.image('explosion', 'assets/explosion.png');
     this.game.load.image('box', 'assets/box.png');
@@ -60,35 +64,43 @@ export class GameConfigService {
   }
 
   defineButtons() {
-    this.buttonUp = this.game.add.button(50, this.screenHeight - 160, 'button-up', null, this, 0, 1, 0, 1);
+
+    // const screenWidth = this.game.scale.viewportWidth;
+    // const screenHeight = this.game.scale.viewportHeight;
+
+    const screenWidth = environment.tile.tileSize * environment.tile.mapWidth;
+    const screenHeight = environment.tile.tileSize * environment.tile.mapHeight;
+
+
+    this.buttonUp = this.game.add.button(50, screenHeight - 160, 'button-up', null, this, 0, 1, 0, 1);
     this.buttonUp.fixedToCamera = true;
     this.buttonUp.events.onInputOver.add(() => this.up = true);
     this.buttonUp.events.onInputOut.add(() => this.up = false);
     this.buttonUp.events.onInputDown.add(() => this.up = true);
     this.buttonUp.events.onInputUp.add(() => this.up = false);
 
-    this.buttonLeft = this.game.add.button(0, this.screenHeight - 110, 'button-left', null, this, 0, 1, 0, 1);
+    this.buttonLeft = this.game.add.button(0, screenHeight - 110, 'button-left', null, this, 0, 1, 0, 1);
     this.buttonLeft.fixedToCamera = true;
     this.buttonLeft.events.onInputOver.add(() => this.left = true);
     this.buttonLeft.events.onInputOut.add(() => this.left = false);
     this.buttonLeft.events.onInputDown.add(() => this.left = true);
     this.buttonLeft.events.onInputUp.add(() => this.left = false);
 
-    this.buttonRight = this.game.add.button(85, this.screenHeight - 110, 'button-right', null, this, 0, 1, 0, 1);
+    this.buttonRight = this.game.add.button(85, screenHeight - 110, 'button-right', null, this, 0, 1, 0, 1);
     this.buttonRight.fixedToCamera = true;
     this.buttonRight.events.onInputOver.add(() => this.right = true);
     this.buttonRight.events.onInputOut.add(() => this.right = false);
     this.buttonRight.events.onInputDown.add(() => this.right = true);
     this.buttonRight.events.onInputUp.add(() => this.right = false);
 
-    this.buttonDown = this.game.add.button(50, this.screenHeight - 76, 'button-down', null, this, 0, 1, 0, 1);
+    this.buttonDown = this.game.add.button(50, screenHeight - 76, 'button-down', null, this, 0, 1, 0, 1);
     this.buttonDown.fixedToCamera = true;
     this.buttonDown.events.onInputOver.add(() => this.down = true);
     this.buttonDown.events.onInputOut.add(() => this.down = false);
     this.buttonDown.events.onInputDown.add(() => this.down = true);
     this.buttonDown.events.onInputUp.add(() => this.down = false);
 
-    this.buttonAction = this.game.add.button(this.screenWidth - 100, this.screenHeight - 100, 'button-action', null, this, 0, 1, 0, 1);
+    this.buttonAction = this.game.add.button(screenWidth - 100, screenHeight - 100, 'button-action', null, this, 0, 1, 0, 1);
     this.buttonAction.fixedToCamera = true;
     this.buttonAction.events.onInputOver.add(() => this.action = true);
     this.buttonAction.events.onInputOut.add(() => this.action = false);
@@ -119,8 +131,13 @@ export class GameConfigService {
     });
   }
 
-  definePlayer() {
-    this.player = this.game.add.sprite(environment.tile.tileSize * 2, environment.tile.tileSize * 3, 'player');
+  definePlayer(fisrtPlayer: boolean) {
+    let pos = fisrtPlayer ? this.positionPlayer1 : this.positionPlayer2;
+
+    this.player = this.game.add.sprite(
+      environment.tile.tileSize * pos.x, 
+      environment.tile.tileSize * pos.y, 
+      'player');
   }
 
   definePlayerCollision(collionCallback) {
@@ -132,8 +149,13 @@ export class GameConfigService {
     this.player.body.onCollide.add(collionCallback, this);
   }
 
-  defineOtherPlayer() {
-    this.otherPlayer = this.game.add.sprite(environment.tile.tileSize * 2, environment.tile.tileSize * 3, 'player');
+  defineOtherPlayer(fisrtPlayer: boolean) {
+    let pos = fisrtPlayer ? this.positionPlayer1 : this.positionPlayer2;
+
+    this.otherPlayer = this.game.add.sprite(
+      environment.tile.tileSize * pos.x,
+      environment.tile.tileSize * pos.y,
+      'other-player');
   }
 
   defineCursors() {

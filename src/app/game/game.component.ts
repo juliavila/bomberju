@@ -24,7 +24,9 @@ export class GameComponent implements OnInit, OnDestroy {
   gameStatusEnum = GameStatusEnum;
   winGif: string;
 
-  words = ['victory','celebration','dancing','win'];
+  words = ['victory','celebration','dancing','win','happy'];
+
+  fisrtPlayer = false;
   
   constructor(private roomService: RoomService,
     private messageManager: MessageManagerService, 
@@ -37,7 +39,7 @@ export class GameComponent implements OnInit, OnDestroy {
   ngOnInit() { 
     localStorage.clear();
 
-    this.refreshWinGif(this.words[(Math.random() * 4)]);
+    this.refreshWinGif(this.words[(Math.random() * 5)]);
   }
 
   ngOnDestroy() { 
@@ -49,10 +51,13 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   enterRoom() {
-    this.roomService.enterRoom();
     this.gameController.gameStatus = GameStatusEnum.WAITING;
-    this.messageManager.sendMessage(EventTypeEnum.READY);    
-    this.checkGameInit();
+    this.roomService.enterRoom().then(() => {
+      this.messageManager.sendMessage(EventTypeEnum.READY);    
+      console.log('>>>>>>>>>>', this.roomService.getRoom())
+      this.fisrtPlayer = this.roomService.getRoom().playerId == '1';
+      this.checkGameInit();
+    });
   }
 
   checkGameInit() {
@@ -64,7 +69,8 @@ export class GameComponent implements OnInit, OnDestroy {
           this.gameConfig, 
           this.gameController, 
           this.explosionService, 
-          this.util);
+          this.util,
+          this.fisrtPlayer);
       }
     });
   }
@@ -81,7 +87,7 @@ export class GameComponent implements OnInit, OnDestroy {
   refreshWinGif(search: string) {
     this.gifService.getGif(search)
       .then(
-        res => this.winGif = res.data.url, 
+        res => this.winGif = res.data.image_url, 
         err => this.winGif = 'https://media.giphy.com/media/3oz8xwooUvMqNB1zEs/giphy.gif'
       );
   }
@@ -91,7 +97,8 @@ export class GameComponent implements OnInit, OnDestroy {
     gameConfig: GameConfigService,
     gameController: gameControllerService,
     explosionService: ExplosionService,
-    util: UtilService) {    
+    util: UtilService,
+    fisrtPlayer: boolean) {    
     
     gameController.gameStatus = GameStatusEnum.PLAYING;
     
@@ -104,8 +111,8 @@ export class GameComponent implements OnInit, OnDestroy {
 
     let putOff = false;
 
-    const screenWidth = window.innerWidth * window.devicePixelRatio; //environment.tile.tileSize * environment.tile.mapWidth;
-    const screenHeight = window.innerHeight * window.devicePixelRatio; //environment.tile.tileSize * environment.tile.mapHeight;
+    const screenWidth = environment.tile.tileSize * environment.tile.mapWidth;
+    const screenHeight = environment.tile.tileSize * environment.tile.mapHeight;
 
     // window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio, Phaser.CANVAS, 'gameArea'
 
@@ -118,8 +125,8 @@ export class GameComponent implements OnInit, OnDestroy {
     function preload() {
       gameConfig.loadAssets();
 
-      gameConfig.game.scale.scaleMode = Phaser.ScaleManager.NO_SCALE;
-      gameConfig.game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
+      gameConfig.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+      gameConfig.game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
     }
 
     function create() {
@@ -133,11 +140,11 @@ export class GameComponent implements OnInit, OnDestroy {
       gameConfig.defineObstacles();
 
       // player
-      gameConfig.definePlayer();
+      gameConfig.definePlayer(fisrtPlayer);
       gameConfig.definePlayerCollision(checkPlayerCollision);
 
       // TODO: inicializar em lugares opostos
-      gameConfig.defineOtherPlayer();
+      gameConfig.defineOtherPlayer(!fisrtPlayer);
 
       // keyboard
       gameConfig.defineCursors();

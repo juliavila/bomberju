@@ -25,6 +25,13 @@
     <p>we're finding for a room</p>
   </div>
 
+  <button type="button" 
+    class="play-again-button"
+    *ngIf="showPlayAgain()"
+    (click)="refresh()">
+    Play Again
+  </button>
+
   <ng-container *ngIf="gameController.gameStatus === gameStatusEnum.WIN">
     <h3 class="lose">You win</h3>
     <img [src]="winGif" alt="#dancing">
@@ -34,12 +41,4 @@
     <h3 class="lose">YOU LOSE =(</h3>
     <img src="https://media.giphy.com/media/OPU6wzx8JrHna/giphy.gif" alt="#sad">
   </ng-container>
-
-  <button type="button" 
-    class="play-again-button"
-    *ngIf="showPlayAgain()"
-    (click)="refresh()">
-    Play Again
-  </button>
-
 </div>

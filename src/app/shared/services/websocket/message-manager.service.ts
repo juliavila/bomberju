@@ -18,6 +18,8 @@ export class MessageManagerService {
   sendMessage(type: EventTypeEnum, x?: number, y?: number) {
     if (type === EventTypeEnum.WIN) console.log('get room', this.roomService.getRoom());
     let event = new EventModel();
+
+    console.log('getRoom', this.roomService.getRoom())
     event.room = this.roomService.getRoom();
     event.type = type;
 

@@ -511,18 +511,6 @@
                 {
                  "gid":3,
                  "height":32,
-                 "id":65,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":352,
-                 "y":320
-                }, 
-                {
-                 "gid":3,
-                 "height":32,
                  "id":66,
                  "name":"",
                  "rotation":0,

@@ -8,10 +8,11 @@ export class RoomService {
   
   constructor(private http: HttpClient) {}
 
-  enterRoom(): void {
+  enterRoom(): Promise<void> {
+    console.log('enterRoom')
     const url = `${environment.baseUrl}enterRoom`;
 
-    this.http.get(url)
+    return this.http.get(url)
       .toPromise()
       .then((room: RoomModel) =>{
         localStorage.setItem('room', JSON.stringify(room));

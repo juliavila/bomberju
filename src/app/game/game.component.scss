@@ -6,7 +6,8 @@
   display: flex;
   flex-direction: column;
   padding: 10px;
-  width: 100%;
+  width: 90vw;
+  margin: auto;
 }
 
 img {
@@ -45,7 +46,6 @@ button {
   font-size: 20px;
   padding: 10px 30px;
   font-weight: bold;
-  margin: 22px 0;
   color: white;
 }
 
@@ -58,6 +58,7 @@ button {
 .play-again-button {
   align-self: center;
   background: #FFBF00;
+  margin-top: 20px;
 
   -webkit-animation-name: play-again; /* Safari 4.0 - 8.0 */
   -webkit-animation-duration: .2s; /* Safari 4.0 - 8.0 */
